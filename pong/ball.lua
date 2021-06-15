@@ -45,5 +45,7 @@ end
 
 
 function Ball:render()
+    love.graphics.setColor(255/255, 0/255, 255/255)
     love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+    love.graphics.setColor(255/255, 255/255, 255/255) -- reset color to white
 end

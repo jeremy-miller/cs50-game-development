@@ -26,6 +26,9 @@ PADDLE_SPEED = 200
 BALL_RADIUS = 2
 
 
+WINNING_SCORE = 10
+
+
 function love.load()
     math.randomseed(os.time())
 
@@ -43,7 +46,7 @@ function love.load()
         WINDOW_HEIGHT,
         {
             fullscreen = false,
-            resizable = false,
+            resizable = true,
             vsync = true
         }
     )
@@ -51,14 +54,24 @@ function love.load()
     local small_font_size = 8
     small_font = love.graphics.newFont("font.ttf", small_font_size)
     love.graphics.setFont(small_font) -- set default font
+    local large_font_size = 16
+    large_font = love.graphics.newFont("font.ttf", large_font_size)
     local score_font_size = 32
     score_font = love.graphics.newFont("font.ttf", score_font_size)
+
+    sounds = {
+        paddle_hit = love.audio.newSource("sounds/paddle_hit.wav", "static"),
+        score = love.audio.newSource("sounds/score.wav", "static"),
+        wall_hit = love.audio.newSource("sounds/wall_hit.wav", "static"),
+    }
 
     player1_score = 0
     player2_score = 0
 
     player1 = Paddle(10, 30, PADDLE_WIDTH, PADDLE_HEIGHT)
     player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT)
+
+    servingPlayer = 1
 
     ball = Ball(
         (VIRTUAL_WIDTH / 2) - BALL_RADIUS,  -- X position
@@ -71,9 +84,23 @@ function love.load()
 end
 
 
+-- Resize game window
+function love.resize(w, h)
+    push:resize(w, h)
+end
+
+
 -- "dt" is the number of seconds (or fraction of second) since last love.update() call.
 function love.update(dt)
-    if game_state == "play" then
+    -- Initialize ball's velocity towards player who last scored.
+    if game_state == "serve" then
+        ball.dy = math.random(-50, 50)
+        if servingPlayer == 1 then
+            ball.dx = math.random(140, 200)
+        else -- servingPlayer == 2
+            ball.dx = -math.random(140, 200)
+        end
+    elseif game_state == "play" then
         -- Ball/paddle collision detection
         if ball:collides(player1) then
             ball.dx = -ball.dx * 1.03 -- increase velocity a bit
@@ -85,6 +112,8 @@ function love.update(dt)
             else
                 ball.dy = math.random(10, 150)
             end
+
+            sounds.paddle_hit:play()
         end
         if ball:collides(player2) then
             ball.dx = -ball.dx * 1.03 -- increase velocity a bit
@@ -96,17 +125,46 @@ function love.update(dt)
             else
                 ball.dy = math.random(10, 150)
             end
+
+            sounds.paddle_hit:play()
         end
 
         -- Detect if ball hit upper screen boundary.
         if ball.y <= 0 then
             ball.y = 0
             ball.dy = -ball.dy
+            sounds.wall_hit:play()
         end
         -- Detect if ball hit lower screen boundary, accounting for ball radius.
         if ball.y >= VIRTUAL_HEIGHT - BALL_RADIUS then
             ball.y = VIRTUAL_HEIGHT - BALL_RADIUS
             ball.dy = -ball.dy
+            sounds.wall_hit:play()
+        end
+
+        -- Scoring
+        if ball.x < 0 then
+            player2_score = player2_score + 1
+            sounds.score:play()
+            if player2_score >= WINNING_SCORE then
+                winningPlayer = 2
+                game_state = "done"
+            else
+                servingPlayer = 1
+                ball:reset()
+                game_state = "serve"
+            end
+        elseif ball.x > VIRTUAL_WIDTH then
+            player1_score = player1_score + 1
+            sounds.score:play()
+            if player1_score >= WINNING_SCORE then
+                winningPlayer = 1
+                game_state = "done"
+            else
+                servingPlayer = 2
+                ball:reset()
+                game_state = "serve"
+            end
         end
     end
 
@@ -144,16 +202,26 @@ function love.draw()
     -- Clear screen with grey color.
     love.graphics.clear(40/255, 45/255, 52/255, 255/255)
 
-    love.graphics.setFont(small_font)
-    if game_state == "start" then
-        love.graphics.printf("Hello Start State!", 0, 20, VIRTUAL_WIDTH, "center")
-    else
-        love.graphics.printf("Hello Play State!", 0, 20, VIRTUAL_WIDTH, "center")
-    end
+    displayScore()
 
-    love.graphics.setFont(score_font)
-    love.graphics.print(tostring(player1_score), (VIRTUAL_WIDTH / 2) - 50, VIRTUAL_HEIGHT / 3)
-    love.graphics.print(tostring(player2_score), (VIRTUAL_WIDTH / 2) + 30, VIRTUAL_HEIGHT / 3)
+    if game_state == "start" then
+        love.graphics.setFont(small_font)
+        love.graphics.printf("Welcome to Pong!", 0, 10, VIRTUAL_WIDTH, "center")
+        love.graphics.printf("Press Enter to begin", 0, 20, VIRTUAL_WIDTH, "center")
+    elseif game_state == "serve" then
+        love.graphics.setFont(small_font)
+        local text = "Player " .. tostring(servingPlayer) .. "'s serve!"
+        love.graphics.printf(text, 0, 10, VIRTUAL_WIDTH, "center")
+        love.graphics.printf("Press Enter to serve", 0, 20, VIRTUAL_WIDTH, "center")
+    elseif game_state == "play" then
+        -- no UI to display
+    elseif game_state == "done" then
+        love.graphics.setFont(large_font)
+        local text = "Player " .. tostring(winningPlayer) .. " wins!"
+        love.graphics.printf(text, 0, 10, VIRTUAL_WIDTH, "center")
+        love.graphics.setFont(small_font)
+        love.graphics.printf("Press Enter to restart", 0, 30, VIRTUAL_WIDTH, "center")
+    end
 
     player1:render()
     player2:render()
@@ -167,10 +235,18 @@ function love.draw()
 end
 
 
+function displayScore()
+    love.graphics.setFont(score_font)
+    love.graphics.print(tostring(player1_score), (VIRTUAL_WIDTH / 2) - 50, VIRTUAL_HEIGHT / 3)
+    love.graphics.print(tostring(player2_score), (VIRTUAL_WIDTH / 2) + 30, VIRTUAL_HEIGHT / 3)
+end
+
+
 function displayFPS()
     love.graphics.setFont(small_font)
     love.graphics.setColor(0, 255/255, 0, 255/255)
     love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 10)
+    love.graphics.setColor(255/255, 255/255, 255/255) -- reset color to white
 end
 
 
@@ -179,11 +255,20 @@ function love.keypressed(key)
         love.event.quit()
     elseif key == "enter" or key == "return" then
         if game_state == "start" then
+            game_state = "serve"
+        elseif game_state == "serve" then
             game_state = "play"
-        else
-            game_state = "start"
-
+        elseif game_state == "done" then
+            game_state = "serve"
             ball:reset()
+            player1_score = 0
+            player2_score = 0
+            -- Let losing player serve first.
+            if winningPlayer == 1 then
+                servingPlayer = 2
+            else
+                servingPlayer = 1
+            end
         end
     end
 end
