@@ -1,5 +1,4 @@
-Ball = class{}
-
+Ball = class {}
 
 function Ball:init(x, y, width, height)
     self.x = x
@@ -9,7 +8,6 @@ function Ball:init(x, y, width, height)
     self.dx = math.random(2) == 1 and 100 or -100
     self.dy = math.random(-50, 50)
 end
-
 
 function Ball:reset()
     self.x = (VIRTUAL_WIDTH / 2) - (self.width / 2)
@@ -37,15 +35,13 @@ function Ball:collides(paddle)
     return true
 end
 
-
 function Ball:update(dt)
     self.x = self.x + (self.dx * dt)
     self.y = self.y + (self.dy * dt)
 end
 
-
 function Ball:render()
-    love.graphics.setColor(255/255, 0/255, 255/255)
+    love.graphics.setColor(255 / 255, 0 / 255, 255 / 255)
     love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-    love.graphics.setColor(255/255, 255/255, 255/255) -- reset color to white
+    love.graphics.setColor(255 / 255, 255 / 255, 255 / 255) -- reset color to white
 end

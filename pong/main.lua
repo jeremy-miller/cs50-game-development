@@ -1,33 +1,25 @@
 -- make print() immediately appear in Output, instead of waiting until process exits
 io.stdout:setvbuf("no")
 
-
 push = require("push")
 class = require("class")
-
 
 require("ball")
 require("paddle")
 
-
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
-
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
-
 
 PADDLE_WIDTH = 5
 PADDLE_HEIGHT = 20
 PADDLE_SPEED = 200
 
-
 BALL_RADIUS = 2
 
-
 WINNING_SCORE = 10
-
 
 function love.load()
     math.randomseed(os.time())
@@ -62,7 +54,7 @@ function love.load()
     sounds = {
         paddle_hit = love.audio.newSource("sounds/paddle_hit.wav", "static"),
         score = love.audio.newSource("sounds/score.wav", "static"),
-        wall_hit = love.audio.newSource("sounds/wall_hit.wav", "static"),
+        wall_hit = love.audio.newSource("sounds/wall_hit.wav", "static")
     }
 
     player1_score = 0
@@ -73,22 +65,21 @@ function love.load()
 
     servingPlayer = 1
 
-    ball = Ball(
-        (VIRTUAL_WIDTH / 2) - BALL_RADIUS,  -- X position
+    ball =
+        Ball(
+        (VIRTUAL_WIDTH / 2) - BALL_RADIUS, -- X position
         (VIRTUAL_HEIGHT / 2) - BALL_RADIUS, -- Y position
-        BALL_RADIUS * 2,                    -- width
-        BALL_RADIUS * 2                     -- height
+        BALL_RADIUS * 2, -- width
+        BALL_RADIUS * 2 -- height
     )
 
     game_state = "start"
 end
 
-
 -- Resize game window
 function love.resize(w, h)
     push:resize(w, h)
 end
-
 
 -- "dt" is the number of seconds (or fraction of second) since last love.update() call.
 function love.update(dt)
@@ -194,13 +185,12 @@ function love.update(dt)
     player2:update(dt)
 end
 
-
 function love.draw()
     -- Begin rendering on virtual screen.
     push:start()
 
     -- Clear screen with grey color.
-    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+    love.graphics.clear(40 / 255, 45 / 255, 52 / 255, 255 / 255)
 
     displayScore()
 
@@ -234,21 +224,18 @@ function love.draw()
     push:finish()
 end
 
-
 function displayScore()
     love.graphics.setFont(score_font)
     love.graphics.print(tostring(player1_score), (VIRTUAL_WIDTH / 2) - 50, VIRTUAL_HEIGHT / 3)
     love.graphics.print(tostring(player2_score), (VIRTUAL_WIDTH / 2) + 30, VIRTUAL_HEIGHT / 3)
 end
 
-
 function displayFPS()
     love.graphics.setFont(small_font)
-    love.graphics.setColor(0, 255/255, 0, 255/255)
+    love.graphics.setColor(0, 255 / 255, 0, 255 / 255)
     love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 10)
-    love.graphics.setColor(255/255, 255/255, 255/255) -- reset color to white
+    love.graphics.setColor(255 / 255, 255 / 255, 255 / 255) -- reset color to white
 end
-
 
 function love.keypressed(key)
     if key == "escape" then
