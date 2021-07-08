@@ -1,10 +1,10 @@
-Pipe = class {}
+Pipe = class{}
 
 PIPE_WIDTH = 70
 PIPE_HEIGHT = 288
 PIPE_SCROLL_SPEED = 60
 
-local PIPE_IMAGE = love.graphics.newImage("pipe.png")
+local PIPE_IMAGE = love.graphics.newImage("assets/images/pipe.png")
 
 function Pipe:init(orientation, y)
     self.x = VIRTUAL_WIDTH
