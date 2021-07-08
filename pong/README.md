@@ -3,4 +3,4 @@
 
 [Code](https://github.com/games50/pong)
 
-![cart](./preview.png)
+![preview](./preview.png)
