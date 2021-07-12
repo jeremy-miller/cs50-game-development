@@ -1,0 +1,10 @@
+push = require("lib/push")
+class = require("lib/class")
+
+require("src/constants")
+require("src/paddle")
+require("src/util")
+require("src/statemachine")
+require("src/states/basestate")
+require("src/states/playstate")
+require("src/states/startstate")
