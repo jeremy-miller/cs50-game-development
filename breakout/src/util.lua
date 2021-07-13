@@ -77,3 +77,40 @@ function GenerateQuadsPaddles(atlas)
 
     return quads
 end
+
+--- Get ball quads from give spritesheet (or "atlas").
+-- @param atlas Image: Spritesheet containing the ball images.
+-- @return table: Table with ball quads.
+function GenerateQuadsBalls(atlas)
+    local x = 96
+    local y = 48
+
+    local counter = 1
+    local quads = {}
+
+    -- first row of 4 balls
+    for i = 0, 3 do
+        quads[counter] = love.graphics.newQuad(x, y, 8, 8, atlas:getDimensions())
+        x = x + 8
+        counter = counter + 1
+    end
+
+    x = 96
+    y = 56
+
+    -- second row of 3 balls
+    for i = 0, 2 do
+        quads[counter] = love.graphics.newQuad(x, y, 8, 8, atlas:getDimensions())
+        x = x + 8
+        counter = counter + 1
+    end
+
+    return quads
+end
+
+--- Get brick quads from give spritesheet (or "atlas").
+-- @param atlas Image: Spritesheet containing the brick images.
+-- @return table: Table with brick quads.
+function GenerateQuadsBricks(atlas)
+    return table.slice(GenerateQuads(atlas, 32, 16), 1, 21)
+end

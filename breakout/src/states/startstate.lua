@@ -12,7 +12,13 @@ function StartState:update(dt)
     if love.keyboard.wasPressed("enter") or love.keyboard.wasPressed("return") then
         sounds["confirm"]:play()
         if highlighted == 1 then
-            stateMachine:change("play")
+            stateMachine:change("serve", {
+                paddle = Paddle(1),
+                bricks = LevelMaker.createMap(1),
+                health = 3,
+                score = 0,
+                level = 1,
+            })
         end
     end
 
