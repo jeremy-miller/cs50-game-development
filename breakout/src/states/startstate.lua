@@ -3,6 +3,10 @@ StartState = class{__includes = BaseState}
 -- whether we're highlighting "Start" or "High Scores"
 local highlighted = 1
 
+function StartState:enter(params)
+    self.highScores = params.highScores
+end
+
 function StartState:update(dt)
     if love.keyboard.wasPressed("up") or love.keyboard.wasPressed("down") then
         highlighted = highlighted == 1 and 2 or 1
@@ -12,12 +16,12 @@ function StartState:update(dt)
     if love.keyboard.wasPressed("enter") or love.keyboard.wasPressed("return") then
         sounds["confirm"]:play()
         if highlighted == 1 then
-            stateMachine:change("serve", {
-                paddle = Paddle(1),
-                bricks = LevelMaker.createMap(1),
-                health = 3,
-                score = 0,
-                level = 1,
+            stateMachine:change("paddle-select", {
+                highScores = self.highScores,
+            })
+        else
+            stateMachine:change("high-scores", {
+                highScores = self.highScores,
             })
         end
     end

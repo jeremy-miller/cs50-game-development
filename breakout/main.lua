@@ -30,6 +30,7 @@ function love.load()
         ["balls"] = GenerateQuadsBalls(textures["main"]),
         ["bricks"] = GenerateQuadsBricks(textures["main"]),
         ["hearts"] = GenerateQuads(textures["hearts"], 10, 9),
+        ['arrows'] = GenerateQuads(textures['arrows'], 24, 24),
     }
 
     sounds = {
@@ -56,8 +57,16 @@ function love.load()
         ["serve"] = function() return ServeState() end,
         ["game-over"] = function() return GameOverState() end,
         ["victory"] = function() return VictoryState() end,
+        ["high-scores"] = function() return HighScoreState() end,
+        ["enter-high-score"] = function() return EnterHighScoreState() end,
+        ["paddle-select"] = function() return PaddleSelectState() end,
     }
-    stateMachine:change("start")
+    stateMachine:change("start", {
+        highScores = loadHighScores(),
+    })
+
+    sounds['music']:setLooping(true)
+    sounds['music']:play()
 
     love.keyboard.keysPressed = {}
 
@@ -139,4 +148,42 @@ function renderScore(score)
     love.graphics.setFont(fonts["small"])
     love.graphics.print("Score:", VIRTUAL_WIDTH - 60, 5)
     love.graphics.printf(tostring(score), VIRTUAL_WIDTH - 50, 5, 40, "right")
+end
+
+function loadHighScores()
+    love.filesystem.setIdentity('breakout')
+    local filename = "breakout.txt"
+
+    if not love.filesystem.getInfo(filename) then
+        -- inititialize with default scores
+        local scores = ""
+        for i = 10, 1, -1 do
+            scores = scores .. "AAA\n"
+            scores = scores .. tostring(i * 1000) .. "\n"
+        end
+        love.filesystem.write(filename, scores)
+    end
+
+    local name = true -- whether we're reading a name from the file or not
+    local counter = 1
+    local scores = {}
+
+    for i = 1, 10 do
+        scores[i] = {
+            name = nil,
+            score = nil,
+        }
+    end
+
+    for line in love.filesystem.lines(filename) do
+        if name then
+            scores[counter].name = string.sub(line, 1, 3)
+        else
+            scores[counter].score = tonumber(line)
+            counter = counter + 1
+        end
+        name = not name
+    end
+
+    return scores
 end

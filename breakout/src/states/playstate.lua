@@ -9,6 +9,7 @@ function PlayState:enter(params)
     self.ball.dx = math.random(-200, 200)
     self.ball.dy = math.random(-50, -60)
     self.level = params.level
+    self.highScores = params.highScores
     self.paused = false
 end
 
@@ -59,6 +60,7 @@ function PlayState:update(dt)
                     score = self.score,
                     level = self.level,
                     ball = self.ball,
+                    highScores = self.highScores,
                 })
             end
 
@@ -97,6 +99,7 @@ function PlayState:update(dt)
         if self.health == 0 then
             stateMachine:change("game-over", {
                 score = self.score,
+                highScores = self.highScores,
             })
         else
             stateMachine:change("serve", {
@@ -105,6 +108,7 @@ function PlayState:update(dt)
                 health = self.health,
                 score = self.score,
                 level = self.level,
+                highScores = self.highScores,
             })
         end
     end
